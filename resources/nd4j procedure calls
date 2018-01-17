@@ -1,0 +1,53 @@
+For a time Period:
+
+
+CALL ml.create('user', ['date'], {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, true)
+
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
+
+CALL ml.train('user')
+
+CALL ml.predict('user', {start: 20170515, end: 20170522})
+
+CALL ml.remove('user')
+
+CALL ml.info('user')
+
+
+
+For multiple features (feature is always set to dummy value 16):
+
+
+CALL ml.create('user', ['date', 'feature'], {alpha: 0.1, iter: 300, theta: [0.0, 0.0, 0.0]}, false)
+
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date, feature: 16}, n.count) YIELD result RETURN result
+
+CALL ml.train('user')
+
+CALL ml.predict('user', {date: [20170515, 20170516], feature: [16, 16]})
+
+CALL ml.remove('user')
+
+CALL ml.info('user')
+
+
+
+Sequential Call:
+
+CALL ml.create('user', ['date'], {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, true)
+YIELD result AS createresult 
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515
+CALL ml.add('user', {date: n.date}, n.count)
+YIELD result 
+WITH collect(distinct result) AS addresult, createresult 
+CALL ml.info('user') 
+YIELD result 
+WITH collect(distinct result) AS inforesult, addresult, createresult 
+CALL ml.train('user') 
+YIELD result AS trainresult 
+CALL ml.predict('user', {start: 20170515, end: 20170520})
+YIELD result 
+WITH collect(distinct result) AS predictresult, trainresult, inforesult, addresult, createresult 
+CALL ml.remove('user') 
+YIELD result AS removeresult 
+RETURN  createresult, addresult, inforesult, trainresult, predictresult, removeresult

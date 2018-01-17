@@ -1,0 +1,138 @@
+= Machine Learning Procedures for Neo4j (WIP)
+
+== ToDo:
+
+* Prediction for DL4j RNN
+* Implementation with h2o (?)
+* RowResult unnecessary?
+
+== Description:
+
+My specific version of Machine Learning Stored Procedures for the Neo4j Database.
+
+List of Implementations:
+
+* Linear Regression with Nd4j
+* Recurrent Neural Networks with Dl4j (WIP)
+
+List of Stored Procedures:
+
+* ml.create
+* ml.add
+* ml.train
+* ml.predict
+* ml.remove
+* ml.info 
+
+== Setup:
+
+* Build the application with Maven
+* Location of ZIP file: /target
+* Put the ZIP file in the plugins folder of your Neo4j installation directory
+* Restart Neo4j
+
+== HowTo:
+
+To list all available Stored Procedures in Neo4j Browser execute:
+----
+CALL dbms.procedures
+----
+This procedures have the prefix "ml.".
+
+=== How to call the procedures:
+----
+CALL ml.create("model", {types}, {params}, {extraAttributes}, timePeriod)
+
+MATCH data CALL ml.add("model", {data.features}, data.label) YIELD result RETURN result
+
+CALL ml.train("model") 
+
+CALL ml.predict("model", {features})
+
+CALL ml.remove("model") 
+
+CALL ml.info("model") 
+----
+
+=== Parameters explained:
+
+* "model": String with the name of the model
+* {"types"}: Map of attribute names and their respective data types
+* {params}: Map with hyperparameters for special Machine Learning implementation
+* {extraAttributes}: Map of attributes with constant values the model shall not be trained with but displayed with the result of the prediction. Possible data types are "numeric" and "class".
+* timePeriod: Boolean indicating whether a time period shall be predicted or not
+* {data.features}: Map that assigns the features of the matched data to the types that were defined in the create call
+* data.label: column with label values of the matched data
+* {features}: Map with features for prediction (for timePeriod == false the feature names again must match the types defined in the create call), there are several ways to define this parameter:
+	- for several predictions at once: {feature1: [f1_value1, f1_value2, ..., f1_valueN], feature2:[f2_value1, f2_value2, ..., f2_valueN], ...}
+	- for only one prediction: {feature1: f1_value, feature2: f2_value, ...} or {feature1: [f1_value], feature2: [f2_value], ...} (List is optional)
+	- for timePeriod == true: {start: startDate, end: endDate} (must exactly look like this, with the dates in the format like '20170516' / yyyyMMdd)
+	
+=== Examples:
+
+Predict the user counts for the dates 15.05.2017 and 16.05.2017 
+('test' is an additional class feature always set to dummy value "true" and has no effect on the prediction. 
+It is only included for the purpose of the example.):
+----
+CALL ml.create('user', {date: "numeric", test: "class"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0, 0.0]}, null, false)
+
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date, test: "true"}, n.count) YIELD result RETURN result
+
+CALL ml.train('user')
+
+CALL ml.predict('user', {date: [20170515, 20170516], test: ["true", "true"]})
+
+CALL ml.remove('user')
+----
+
+If you want to have such a dummy value outputted with the prediction result it is recommended to use the {extraAttributes} parameter in the Create Procedure instead:
+----
+CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, {test: 'true'}, false)
+
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
+
+CALL ml.train('user')
+
+CALL ml.predict('user', {date: [20170515, 20170516]})
+
+CALL ml.remove('user')
+----
+
+Predict user counts for the time period from 15.05.2017 to 22.05.2017:
+----
+CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true)
+
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
+
+CALL ml.train('user')
+
+CALL ml.predict('user', {start: 20170515, end: 20170522})
+
+CALL ml.remove('user')
+----
+
+It is also possible to call all the procedures sequentially in one call by yielding the results:
+----
+CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true)
+YIELD result AS createresult 
+MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515
+CALL ml.add('user', {date: n.date}, n.count)
+YIELD result 
+WITH collect(distinct result) AS addresult, createresult 
+CALL ml.info('user') 
+YIELD result 
+WITH collect(distinct result) AS inforesult, addresult, createresult 
+CALL ml.train('user') 
+YIELD result AS trainresult 
+CALL ml.predict('user', {start: 20170515, end: 20170522})
+YIELD result 
+WITH collect(distinct result) AS predictresult, trainresult, inforesult, addresult, createresult 
+CALL ml.remove('user') 
+YIELD result AS removeresult 
+RETURN  createresult, addresult, inforesult, trainresult, predictresult, removeresult
+----
+
+Additional test data and examples can be found at "src/test/resources".
+
+  
+
