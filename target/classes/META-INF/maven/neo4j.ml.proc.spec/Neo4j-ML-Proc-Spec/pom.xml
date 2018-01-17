@@ -3,11 +3,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>neo4j.ml.proc.spec</groupId>
-  <artifactId>Neo4j-ML-Proc-Spec</artifactId>
+  <artifactId>neo4j-ml-proc-spec</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Neo4j-ML-Proc-Spec</name>
+  <name>neo4j-ml-proc-spec</name>
   <url>http://maven.apache.org</url>
 
   <properties>
