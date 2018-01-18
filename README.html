@@ -433,9 +433,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li>
 <p>Implementation with h2o (?)</p>
 </li>
-<li>
-<p>RowResult unnecessary?</p>
-</li>
 </ul>
 </div>
 </div>
@@ -452,10 +449,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p>Linear Regression with Nd4j</p>
+<p>'nd4j': Linear Regression with Nd4j</p>
 </li>
 <li>
-<p>Recurrent Neural Networks with Dl4j (WIP)</p>
+<p>'dl4j': Recurrent Neural Networks with Dl4j (WIP)</p>
 </li>
 </ul>
 </div>
@@ -525,7 +522,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h3 id="_how_to_call_the_procedures">How to call the procedures:</h3>
 <div class="listingblock">
 <div class="content">
-<pre>CALL ml.create("model", {types}, {params}, {extraAttributes}, timePeriod)
+<pre>CALL ml.create("model", {types}, {params}, {extraAttributes}, timePeriod, "implementation")
 
 MATCH data CALL ml.add("model", {data.features}, data.label) YIELD result RETURN result
 
@@ -559,6 +556,9 @@ CALL ml.info("model")</pre>
 <p>timePeriod: Boolean indicating whether a time period shall be predicted or not</p>
 </li>
 <li>
+<p>"implementation": String with the name of the implementation you want to use</p>
+</li>
+<li>
 <p>{data.features}: Map that assigns the features of the matched data to the types that were defined in the create call</p>
 </li>
 <li>
@@ -584,7 +584,7 @@ CALL ml.info("model")</pre>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_examples">Examples:</h3>
+<h3 id="_examples_only_for_linear_regression_implementation_with_nd4j">Examples (only for Linear Regression Implementation with Nd4j):</h3>
 <div class="paragraph">
 <p>Predict the user counts for the dates 15.05.2017 and 16.05.2017
 ('test' is an additional class feature always set to dummy value "true" and has no effect on the prediction.
@@ -592,7 +592,7 @@ It is only included for the purpose of the example.):</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>CALL ml.create('user', {date: "numeric", test: "class"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0, 0.0]}, null, false)
+<pre>CALL ml.create('user', {date: "numeric", test: "class"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0, 0.0]}, null, false, 'nd4j')
 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) &lt; 20170515 CALL ml.add('user', {date: n.date, test: "true"}, n.count) YIELD result RETURN result
 
@@ -608,7 +608,7 @@ CALL ml.remove('user')</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, {test: 'true'}, false)
+<pre>CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, {test: 'true'}, false, 'nd4j')
 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) &lt; 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
 
@@ -624,7 +624,7 @@ CALL ml.remove('user')</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true)
+<pre>CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true, 'nd4j')
 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) &lt; 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
 
@@ -640,7 +640,7 @@ CALL ml.remove('user')</pre>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true)
+<pre>CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true, 'nd4j')
 YIELD result AS createresult
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) &lt; 20170515
 CALL ml.add('user', {date: n.date}, n.count)
@@ -668,7 +668,7 @@ RETURN  createresult, addresult, inforesult, trainresult, predictresult, remover
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-01-17 14:11:11 CET
+Last updated 2018-01-18 15:15:46 CET
 </div>
 </div>
 </body>

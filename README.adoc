@@ -4,7 +4,6 @@
 
 * Prediction for DL4j RNN
 * Implementation with h2o (?)
-* RowResult unnecessary?
 
 == Description:
 
@@ -12,8 +11,8 @@ My specific version of Machine Learning Stored Procedures for the Neo4j Database
 
 List of Implementations:
 
-* Linear Regression with Nd4j
-* Recurrent Neural Networks with Dl4j (WIP)
+* 'nd4j': Linear Regression with Nd4j
+* 'dl4j': Recurrent Neural Networks with Dl4j (WIP)
 
 List of Stored Procedures:
 
@@ -41,7 +40,7 @@ This procedures have the prefix "ml.".
 
 === How to call the procedures:
 ----
-CALL ml.create("model", {types}, {params}, {extraAttributes}, timePeriod)
+CALL ml.create("model", {types}, {params}, {extraAttributes}, timePeriod, "implementation")
 
 MATCH data CALL ml.add("model", {data.features}, data.label) YIELD result RETURN result
 
@@ -61,6 +60,7 @@ CALL ml.info("model")
 * {params}: Map with hyperparameters for special Machine Learning implementation
 * {extraAttributes}: Map of attributes with constant values the model shall not be trained with but displayed with the result of the prediction. Possible data types are "numeric" and "class".
 * timePeriod: Boolean indicating whether a time period shall be predicted or not
+* "implementation": String with the name of the implementation you want to use
 * {data.features}: Map that assigns the features of the matched data to the types that were defined in the create call
 * data.label: column with label values of the matched data
 * {features}: Map with features for prediction (for timePeriod == false the feature names again must match the types defined in the create call), there are several ways to define this parameter:
@@ -68,13 +68,13 @@ CALL ml.info("model")
 	- for only one prediction: {feature1: f1_value, feature2: f2_value, ...} or {feature1: [f1_value], feature2: [f2_value], ...} (List is optional)
 	- for timePeriod == true: {start: startDate, end: endDate} (must exactly look like this, with the dates in the format like '20170516' / yyyyMMdd)
 	
-=== Examples:
+=== Examples (only for Linear Regression Implementation with Nd4j):
 
 Predict the user counts for the dates 15.05.2017 and 16.05.2017 
 ('test' is an additional class feature always set to dummy value "true" and has no effect on the prediction. 
 It is only included for the purpose of the example.):
 ----
-CALL ml.create('user', {date: "numeric", test: "class"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0, 0.0]}, null, false)
+CALL ml.create('user', {date: "numeric", test: "class"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0, 0.0]}, null, false, 'nd4j')
 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date, test: "true"}, n.count) YIELD result RETURN result
 
@@ -87,7 +87,7 @@ CALL ml.remove('user')
 
 If you want to have such a dummy value outputted with the prediction result it is recommended to use the {extraAttributes} parameter in the Create Procedure instead:
 ----
-CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, {test: 'true'}, false)
+CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, {test: 'true'}, false, 'nd4j')
 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
 
@@ -100,7 +100,7 @@ CALL ml.remove('user')
 
 Predict user counts for the time period from 15.05.2017 to 22.05.2017:
 ----
-CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true)
+CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true, 'nd4j')
 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515 CALL ml.add('user', {date: n.date}, n.count) YIELD result RETURN result
 
@@ -113,7 +113,7 @@ CALL ml.remove('user')
 
 It is also possible to call all the procedures sequentially in one call by yielding the results:
 ----
-CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true)
+CALL ml.create('user', {date: "numeric"}, {alpha: 0.1, iter: 300, theta: [0.0, 0.0]}, null, true, 'nd4j')
 YIELD result AS createresult 
 MATCH (n:User {stage:"cpd-ece-prod"}) WHERE toInteger(n.date) < 20170515
 CALL ml.add('user', {date: n.date}, n.count)

@@ -32,13 +32,14 @@ public class ML
        
     /**
      * Creates a new model. 
-     * Example: <code>CALL ml.create("modelName", {attributeName: "numeric"}, {alpha: 0.1}, {extraAttributeName: "true"}, true)</code>
+     * Example: <code>CALL ml.create("modelName", {attributeName: "numeric"}, {alpha: 0.1}, {extraAttributeName: "true"}, true, 'implementationName')</code>
      *
      * @param model the name of the model
      * @param types the Map of attribute names and their respective data types
      * @param params the hyperparameters for the specific Machine Learning implementation
      * @param extra the Map of attributes with constant values the model shall not be trained with but displayed with the result of the prediction
      * @param timePeriod the boolean that indicates whether a time series shall be predicted or not
+     * @param implementation the name of the implementation to use
      * @return the stream of RowResult
      */
     @Procedure
