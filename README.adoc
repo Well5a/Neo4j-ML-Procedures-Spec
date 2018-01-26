@@ -22,6 +22,11 @@ List of Stored Procedures:
 * ml.predict
 * ml.remove
 * ml.info 
+* ml.models
+
+=== New in 0.1.0:
+
+New procedure ml.models to list the existing models in the database
 
 == Setup:
 

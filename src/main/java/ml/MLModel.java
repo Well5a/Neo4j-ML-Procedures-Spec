@@ -3,6 +3,7 @@ package ml;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -200,6 +201,23 @@ public abstract class MLModel
 	 * @return the List of Information about specific Objects
 	 */
 	protected abstract List<Object> getSpecials();
+	
+	
+	/**
+	 * Returns a List of names of all Models that have been created.
+	 * 
+	 * @return the List of Model names
+	 */
+	public static List<String> getAllModels()
+	{
+		List<String> modelNames = Collections.list(models.keys());
+		Collections.sort(modelNames);
+		if(modelNames.isEmpty())
+		{
+			modelNames.add("There are currently no models in the database");
+		}
+		return modelNames;
+	}
 	
 	/**
 	 * The Enum State holds the possible values for the class variable <tt>state</tt> 

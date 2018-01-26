@@ -153,6 +153,24 @@ public class ML
         return Stream.of(MLModel.remove(model));
     }
     
+    /**
+     * Returns a list of the models that have been created.
+     * 
+     * @return the stream of RowResult
+     */
+    @Procedure
+    public Stream<RowResult> models() 
+    {
+    	List<RowResult> result 	= new ArrayList<>();
+    	List<String> models 	= MLModel.getAllModels();
+    	Iterator<String> iter 	= models.iterator();
+    	while(iter.hasNext())
+    	{
+    		result.add(new RowResult(iter.next()));
+    	}
+        return result.stream();
+    }
+    
     
     /**
      * Used as an object to be returned as a stream to Neo4j and displayed as the result of a stored procedure.

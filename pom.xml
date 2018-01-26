@@ -4,7 +4,7 @@
 
   <groupId>neo4j.ml.proc.spec</groupId>
   <artifactId>neo4j-ml-proc-spec</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.0</version>
   <packaging>jar</packaging>
 
   <name>neo4j-ml-proc-spec</name>

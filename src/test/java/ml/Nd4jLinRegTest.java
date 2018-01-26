@@ -85,6 +85,10 @@ public class Nd4jLinRegTest
         System.out.println("predictResult.resultAsString() = \n" + result.resultAsString());
         
         
+        result = db.execute("CALL ml.models()");
+        System.out.println("modelsResult.resultAsString() = \n" + result.resultAsString());
+        
+        
         //Remove models:
         result = db.execute("CALL ml.remove('user')");
         System.out.println("removeResult.resultAsString() = \n" + result.resultAsString());
